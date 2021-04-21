@@ -1,6 +1,6 @@
 const Sequelize = require("sequelize");
 const jwt = require("jsonwebtoken");
-
+const bcrypt = require("bcrypt");
 const config = { logging: false };
 if (process.env.LOGGING) {
   delete config.logging;
@@ -16,9 +16,15 @@ const User = db.define("user", {
   username: DataTypes.STRING,
   password: DataTypes.STRING,
 });
+User.addHook("beforeSave", async function (user) {
+  user.password = await bcrypt.hash(user.password, 5);
+});
+// User.beforeSave = function (user) {
+//   user.password = bcrypt.hash(user.password, 5);
+// };
 User.authenticate = async function ({ username, password }) {
-  const user = await User.findOne({ where: { username, password } });
-  if (user) {
+  const user = await User.findOne({ where: { username } });
+  if (user && (await bcrypt.compare(password, user.password))) {
     return jwt.sign({ id: user.id }, process.env.JWT);
   }
   const error = Error("bad credentials");
@@ -30,7 +36,10 @@ User.byToken = async function (token) {
   try {
     const { id } = jwt.verify(token, process.env.JWT);
     const user = await User.findByPk(id);
-    return user;
+    if (user) return user;
+    const error = Error("bad credentials");
+    error.status = 401;
+    throw error;
   } catch (ex) {
     const error = Error("bad credentials");
     error.status = 401;
@@ -57,7 +66,6 @@ const syncAndSeed = async () => {
 };
 
 const { expect } = require("chai");
-const { ValidationErrorItem } = require("sequelize");
 
 describe("Models", () => {
   let seed;
@@ -106,6 +114,17 @@ describe("Models", () => {
               { id: seed.users.jerry.id },
               "whatever"
             );
+            await User.byToken(token);
+          } catch (error) {
+            expect(error.status).to.equal(401);
+            expect(error.message).to.equal("bad credentials");
+          }
+        });
+      });
+      describe("with a valid token but no associated user", () => {
+        it("throws a 401", async () => {
+          try {
+            const token = await jwt.sign({ id: 99 }, process.env.JWT);
             await User.byToken(token);
           } catch (error) {
             expect(error.status).to.equal(401);
