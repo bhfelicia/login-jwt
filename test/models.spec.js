@@ -17,8 +17,11 @@ const User = db.define("user", {
   password: DataTypes.STRING,
 });
 User.addHook("beforeSave", async function (user) {
-  user.password = await bcrypt.hash(user.password, 5);
+  if (user._changed.has("password")) {
+    user.password = await bcrypt.hash(user.password, 5);
+  }
 });
+//below not working
 // User.beforeSave = function (user) {
 //   user.password = bcrypt.hash(user.password, 5);
 // };
@@ -73,6 +76,17 @@ describe("Models", () => {
   describe("seeded data", () => {
     it("there are 3 users", () => {
       expect(Object.keys(seed.users).length).to.equal(3);
+    });
+    describe("User update", () => {
+      describe("change username", () => {
+        it("does not change the password", async () => {
+          const password = seed.users.elaine.password;
+          const elaine = seed.users.elaine;
+          elaine.username = "lucy";
+          await elaine.save();
+          expect(elaine.password).to.equal(password);
+        });
+      });
     });
     describe("user.authenticate", () => {
       describe("correct credentials", () => {
