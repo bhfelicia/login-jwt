@@ -33,7 +33,10 @@
           this.login = this.login.bind(this);
           this.logout = this.logout.bind(this);
         }
-        async componentDidMount() {
+        componentDidMount() {
+          this.exchangeToken();
+        }
+        async exchangeToken() {
           const token = window.localStorage.getItem("token");
           if (token) {
             const user = await axios.get("/api/auth", {
@@ -52,13 +55,7 @@
             const response = await axios.post("/api/auth", credentials);
             const { token } = response.data;
             window.localStorage.setItem("token", token);
-            const user = (
-              await axios.get("/api/auth", {
-                headers: { authorization: token },
-              })
-            ).data;
-            console.log(user);
-            this.setState({ auth: user });
+            this.exchangeToken();
           } catch (error) {
             console.log(error);
           }
