@@ -21,10 +21,6 @@ app.post("/api/auth", async (req, res, next) => {
 
 app.get("/api/auth", async (req, res, next) => {
   try {
-    console.log(
-      "in the GET, req headers authorization",
-      req.headers.authorization
-    );
     res.send(await User.byToken(req.headers.authorization));
   } catch (error) {
     next(error);

@@ -31,26 +31,41 @@
             auth: {},
           };
           this.login = this.login.bind(this);
+          this.logout = this.logout.bind(this);
+        }
+        async componentDidMount() {
+          const token = window.localStorage.getItem("token");
+          if (token) {
+            const user = await axios.get("/api/auth", {
+              headers: { authorization: token },
+            });
+            this.setState({ auth: user.data });
+          }
+        }
+        logout() {
+          window.localStorage.removeItem("token");
+          this.setState({ auth: {} });
         }
         async login(credentials) {
           try {
             console.log(credentials);
             const response = await axios.post("/api/auth", credentials);
-            let { token } = response.data;
+            const { token } = response.data;
+            window.localStorage.setItem("token", token);
             const user = (
               await axios.get("/api/auth", {
                 headers: { authorization: token },
               })
             ).data;
             console.log(user);
-            this.setState({ user });
+            this.setState({ auth: user });
           } catch (error) {
             console.log(error);
           }
         }
         render() {
           const { auth } = this.state;
-          const { login } = this;
+          const { login, logout } = this;
           if (!auth.id) {
             return (
               <div>
@@ -67,6 +82,11 @@
               </div>
             );
           }
+          return (
+            <div>
+              Welcome {auth.username}!<button onClick={logout}>Logout</button>
+            </div>
+          );
         }
       }
       ReactDOM.render(<App />, document.querySelector("#root"));
