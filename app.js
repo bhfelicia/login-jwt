@@ -8,10 +8,12 @@ module.exports = app;
 
 app.use(express.json());
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
+
 app.post("/api/auth", async (req, res, next) => {
   try {
-    const token = await User.authenticate(req.body);
-    res.send({ token });
+    res.send({ token: await User.authenticate(req.body) });
+    // const token = await User.authenticate(req.body);
+    // res.send({ token });
   } catch (error) {
     next(error);
   }
@@ -19,6 +21,10 @@ app.post("/api/auth", async (req, res, next) => {
 
 app.get("/api/auth", async (req, res, next) => {
   try {
+    console.log(
+      "in the GET, req headers authorization",
+      req.headers.authorization
+    );
     res.send(await User.byToken(req.headers.authorization));
   } catch (error) {
     next(error);

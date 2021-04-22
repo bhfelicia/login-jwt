@@ -30,15 +30,36 @@
           this.state = {
             auth: {},
           };
+          this.login = this.login.bind(this);
+        }
+        async login(credentials) {
+          try {
+            console.log(credentials);
+            const response = await axios.post("/api/auth", credentials);
+            let { token } = response.data;
+            const user = (
+              await axios.get("/api/auth", {
+                headers: { authorization: token },
+              })
+            ).data;
+            console.log(user);
+            this.setState({ user });
+          } catch (error) {
+            console.log(error);
+          }
         }
         render() {
           const { auth } = this.state;
+          const { login } = this;
           if (!auth.id) {
             return (
               <div>
                 {credentials.map((credential) => {
                   return (
-                    <button key={credential.username}>
+                    <button
+                      key={credential.username}
+                      onClick={() => login(credential)}
+                    >
                       {credential.username}
                     </button>
                   );

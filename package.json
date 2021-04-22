@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha",
     "test:dev": "JWT=shh DATABASE_URL=postgres://localhost/acme_db npm run test -- --watch",
-    "start:dev": "JWT=shh nodemon server"
+    "start:dev": "JWT=shhh nodemon server"
   },
   "keywords": [],
   "author": "",
