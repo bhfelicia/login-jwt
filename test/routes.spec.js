@@ -35,4 +35,19 @@ describe("Routes", () => {
       });
     });
   });
+  describe("GET /api/auth", () => {
+    describe("with valid token", () => {
+      it("returns a user", async () => {
+        const token = await jwt.sign(
+          { id: seed.users.george.id },
+          process.env.JWT
+        );
+        const response = await app
+          .get("/api/auth")
+          .set({ authorization: token });
+        expect(response.status).to.equal(200);
+        expect(response.body.username).to.equal("george");
+      });
+    });
+  });
 });

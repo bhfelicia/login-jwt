@@ -1,0 +1,54 @@
+<html>
+  <head>
+    <script
+      src="https://unpkg.com/react@17/umd/react.development.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+      crossorigin
+    ></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"
+      integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ=="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const credentials = [
+        { username: "jerry", password: "jerry_pw" },
+        { username: "elaine", password: "elaine_pw" },
+        { username: "george", password: "george_pw" },
+      ];
+      const { Component } = React;
+      class App extends Component {
+        constructor() {
+          super();
+          this.state = {
+            auth: {},
+          };
+        }
+        render() {
+          const { auth } = this.state;
+          if (!auth.id) {
+            return (
+              <div>
+                {credentials.map((credential) => {
+                  return (
+                    <button key={credential.username}>
+                      {credential.username}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          }
+        }
+      }
+      ReactDOM.render(<App />, document.querySelector("#root"));
+    </script>
+  </body>
+</html>

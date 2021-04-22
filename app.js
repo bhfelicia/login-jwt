@@ -3,15 +3,23 @@ const app = express();
 const {
   models: { User },
 } = require("./db");
-
+const path = require("path");
 module.exports = app;
 
 app.use(express.json());
-
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
 app.post("/api/auth", async (req, res, next) => {
   try {
     const token = await User.authenticate(req.body);
     res.send({ token });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/auth", async (req, res, next) => {
+  try {
+    res.send(await User.byToken(req.headers.authorization));
   } catch (error) {
     next(error);
   }
